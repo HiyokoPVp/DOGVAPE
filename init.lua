@@ -22,7 +22,7 @@ local function downloadFile(path, func)
 	if not isfile(path) then
 		downloader.Text = 'Downloading '.. path
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/MaxlaserTech/CatV6/'..readfile('catrewrite/profiles/commit.txt')..'/'..select(1, path:gsub('catrewrite/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/HiyokoPVp/DOGVAPE/'..readfile('catrewrite/profiles/commit.txt')..'/'..select(1, path:gsub('catrewrite/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -59,7 +59,7 @@ end
 
 if not shared.VapeDeveloper then
 	local _, subbed = pcall(function() 
-		return game:HttpGet('https://github.com/MaxlaserTech/CatV6') 
+		return game:HttpGet('https://github.com/HiyokoPVp/DOGVAPE') 
 	end)
 	local commit = subbed:find('currentOid')
 	commit = commit and subbed:sub(commit + 13, commit + 52) or nil
