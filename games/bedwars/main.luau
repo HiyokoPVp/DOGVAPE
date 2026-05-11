@@ -1,4 +1,7 @@
 --!nocheck
+
+print("HARUPIYO EDITION LOADING")
+
 local cloneref = cloneref or function(obj)
 	return obj
 end
