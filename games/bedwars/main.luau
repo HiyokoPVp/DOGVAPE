@@ -261,11 +261,17 @@ local function getPlacedBlock(pos)
 end
 getgenv().getPlacedBlock = getPlacedBlock
 
+-- getBlocksInPoints を最適化
 local function getBlocksInPoints(s, e)
-	local blocks, list = bedwars.BlockController:getStore(), {}
-	for x = s.X, e.X do
-		for y = s.Y, e.Y do
-			for z = s.Z, e.Z do
+	local blocks = bedwars.BlockController:getStore()
+	local list = {}
+	-- 範囲チェック追加して無駄なループ減らす
+	local range = (e - s).Magnitude
+	if range > 100 then return list end -- 範囲大きすぎたら即リターン
+	
+	for x = s.X, e.X, 3 do -- ステップ幅を3にして処理減らす
+		for y = s.Y, e.Y, 3 do
+			for z = s.Z, e.Z, 3 do
 				local vec = Vector3.new(x, y, z)
 				if blocks:getBlockAt(vec) then
 					table.insert(list, vec * 3)
