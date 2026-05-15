@@ -1309,48 +1309,61 @@ run(function()
 		table.insert(sides, Vector3.FromNormalId(v) * 3)
 	end
 
-	local function updateStore(new, old)
-		if new.Bedwars ~= old.Bedwars then
-			store.equippedKit = new.Bedwars.kit ~= 'none' and new.Bedwars.kit or ''
-		end
+local function updateStore(new, old)
+    if new.Bedwars ~= old.Bedwars then
+        store.equippedKit = (new.Bedwars and new.Bedwars.kit ~= 'none') and new.Bedwars.kit or ''
+    end
 
-		if new.Game ~= old.Game then
-			store.matchState = new.Game.matchState
-			store.queueType = new.Game.queueType or 'bedwars_test'
-		end
+    if new.Game ~= old.Game then
+        store.matchState = new.Game and new.Game.matchState
+        store.queueType = (new.Game and new.Game.queueType) or 'bedwars_test'
+    end
 
-		if new.Inventory ~= old.Inventory then
-			local newinv = (new.Inventory and new.Inventory.observedInventory or {inventory = {}})
-			local oldinv = (old.Inventory and old.Inventory.observedInventory or {inventory = {}})
-			store.inventory = newinv
+    if new.Inventory ~= old.Inventory then
+        local newinv = (new.Inventory and new.Inventory.observedInventory) or {inventory = {items = {}, hand = nil}}
+        local oldinv = (old.Inventory and old.Inventory.observedInventory) or {inventory = {items = {}, hand = nil}}
 
-			if newinv ~= oldinv then
-				vapeEvents.InventoryChanged:Fire()
-			end
+        store.inventory = newinv
 
-			if newinv.inventory.items ~= oldinv.inventory.items then
-				vapeEvents.InventoryAmountChanged:Fire()
-				store.tools.sword = getSword()
-				for _, v in {'stone', 'wood', 'wool'} do
-					store.tools[v] = getTool(v)
-				end
-			end
+        if newinv ~= oldinv then
+            vapeEvents.InventoryChanged:Fire()
+        end
 
-			if newinv.inventory.hand ~= oldinv.inventory.hand then
-				local currentHand, toolType = new.Inventory.observedInventory.inventory.hand, ''
-				if currentHand then
-					local handData = bedwars.ItemMeta[currentHand.itemType]
-					toolType = handData.sword and 'sword' or handData.block and 'block' or currentHand.itemType:find('bow') and 'bow'
-				end
+        if newinv.inventory.items ~= oldinv.inventory.items then
+            vapeEvents.InventoryAmountChanged:Fire()
+            store.tools.sword = getSword()
 
-				store.hand = {
-					tool = currentHand and currentHand.tool,
-					amount = currentHand and currentHand.amount or 0,
-					toolType = toolType
-				}
-			end
-		end
-	end
+            for _, v in {'stone', 'wood', 'wool'} do
+                store.tools[v] = getTool(v)
+            end
+        end
+
+        if newinv.inventory.hand ~= oldinv.inventory.hand then
+            local currentHand = newinv.inventory.hand
+            local toolType = ''
+
+            if currentHand and currentHand.itemType then
+                local handData = bedwars.ItemMeta and bedwars.ItemMeta[currentHand.itemType]
+
+                if handData then
+                    if handData.sword then
+                        toolType = 'sword'
+                    elseif handData.block then
+                        toolType = 'block'
+                    elseif string.find(currentHand.itemType, 'bow') then
+                        toolType = 'bow'
+                    end
+                end
+            end
+
+            store.hand = {
+                tool = currentHand and currentHand.tool or nil,
+                amount = currentHand and currentHand.amount or 0,
+                toolType = toolType
+            }
+        end
+    end
+end
 
 	local storeChanged = bedwars.Store.changed:connect(updateStore)
 	updateStore(bedwars.Store:getState(), {})
